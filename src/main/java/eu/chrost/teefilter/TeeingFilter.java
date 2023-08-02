@@ -8,8 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -30,7 +30,7 @@ public class TeeingFilter extends OncePerRequestFilter {
             ContentCachingRequestWrapper contentCachingRequestWrapper = new ContentCachingRequestWrapper(request);
             filterChain.doFilter(contentCachingRequestWrapper, response);
             ServletServerHttpRequest servletServerHttpRequest = new ServletServerHttpRequest((HttpServletRequest) contentCachingRequestWrapper.getRequest());
-            RestTemplate restTemplate = new RestTemplate();
+            RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
             ResponseEntity<String> exchange = restTemplate.exchange(servletServerHttpRequest.getURI().toString().replace("old", "new"),
                     servletServerHttpRequest.getMethod(),
                     new HttpEntity<>(contentCachingRequestWrapper.getContentAsByteArray(), servletServerHttpRequest.getHeaders()),
